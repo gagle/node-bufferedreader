@@ -5,7 +5,7 @@
  * @author Gabriel Llamas
  * @created 10/04/2012
  * @modified 11/04/2012
- * @version 0.0.2
+ * @version 0.0.3
  */
 "use strict";
 
@@ -68,7 +68,7 @@ BufferedReader.prototype.read = function (){
 			for (var i=0; i<len; i++){
 				character = data[i];
 				if (me._stream.encoding){
-					me.emit ("character", character);
+					me.emit ("character", character === "\r" ? "\n" : character);
 				}else{
 					me.emit ("byte", character);
 					continue;
@@ -76,15 +76,15 @@ BufferedReader.prototype.read = function (){
 				
 				var eol = character === "\n" || character === "\r";
 				if (eol){
-					chunk = data.slice (offset, i++);
-					offset = i;
+					chunk = data.slice (offset, i);
+					offset = i + 1;
 					
 					if (lastChunk){
 						chunk = lastChunk.concat (chunk);
 						lastChunk = null;
 					}
 					
-					if (i+1 !== len && character === "\r" && data[i+1] === "\n"){
+					if (i + 1 !== len && character === "\r" && data[i + 1] === "\n"){
 						i++;
 					}
 					

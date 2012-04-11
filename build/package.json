@@ -1,0 +1,22 @@
+{
+	"name":				"buffered-reader",
+	"author": {
+		"name":			"Gabriel Llamas"
+	},
+	"version":			"0.0.2",
+	"description":		"Fully configurable buffered reader.",
+	"repository": {
+		"type": 		"git",
+		"url":			"git://github.com/Gagle/Node-BufferedReader.git"
+	},
+	"engines": {
+		"node":			"*"
+	},
+	"keywords":			["buffer", "reader", "line", "read line", "read file", "read text file",
+						"file"],
+	"licenses": [{
+		"type":			"MIT",
+		"url":			"http://www.opensource.org/licenses/mit-license.html"
+	}],
+	"main":				"buffered-reader"
+}

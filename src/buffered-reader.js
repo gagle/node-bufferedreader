@@ -5,7 +5,7 @@
  * @author Gabriel Llamas
  * @created 10/04/2012
  * @modified 11/04/2012
- * @version 0.0.3
+ * @version 0.0.4
  */
 "use strict";
 
@@ -35,21 +35,21 @@ var BufferedReader = function (fileName, bufferSize, encoding){
 		bufferSize = BUFFER_SIZE;
 	}
 	
-	this._stream = FS.createReadStream (getFileName (fileName), {
-		bufferSize: bufferSize,
-		encoding: encoding
-	});
+	this._settings = {
+		encoding: encoding,
+		bufferSize: bufferSize
+	};
 	
-	var me = this;
-	this._stream.on ("error", function (error){
-		me.emit ("error", error);
-	});
+	this._fileName = getFileName (fileName);
 };
 
 BufferedReader.prototype = Object.create (EVENTS.EventEmitter.prototype);
 BufferedReader.prototype.constructor = BufferedReader;
 
 BufferedReader.prototype.read = function (){
+	var stream = FS.createReadStream (this._fileName, this._settings);
+	
+	var me = this;
 	var lastChunk;
 	var buffer;
 	var me = this;
@@ -57,7 +57,7 @@ BufferedReader.prototype.read = function (){
 	var loop = this.listeners ("character").length !== 0 || this.listeners ("line").length !== 0 ||
 		this.listeners ("byte").length !== 0;
 	
-	this._stream.on ("data", function (data){
+	stream.on ("data", function (data){
 		buffer = data;
 		var offset = 0;
 		var chunk;
@@ -67,15 +67,14 @@ BufferedReader.prototype.read = function (){
 		if (loop){
 			for (var i=0; i<len; i++){
 				character = data[i];
-				if (me._stream.encoding){
+				if (stream.encoding){
 					me.emit ("character", character === "\r" ? "\n" : character);
 				}else{
 					me.emit ("byte", character);
 					continue;
 				}
 				
-				var eol = character === "\n" || character === "\r";
-				if (eol){
+				if (character === "\n" || character === "\r"){
 					chunk = data.slice (offset, i);
 					offset = i + 1;
 					
@@ -92,7 +91,7 @@ BufferedReader.prototype.read = function (){
 				}
 			}
 			
-			if (me._stream.encoding && offset !== len){
+			if (stream.encoding && offset !== len){
 				var s = offset === 0 ? data : data.slice (offset);
 				lastChunk = lastChunk ? lastChunk.concat (s) : s;
 			}
@@ -101,12 +100,16 @@ BufferedReader.prototype.read = function (){
 		me.emit ("buffer", data);
 	});
 	
-	this._stream.on ("end", function (){
+	stream.on ("end", function (){
 		if (loop && lastChunk){
 			me.emit ("line", lastChunk);
 		}
 		
 		me.emit ("end");
+	});
+	
+	stream.on ("error", function (error){
+		me.emit ("error", error);
 	});
 };
 

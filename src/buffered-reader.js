@@ -4,8 +4,8 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 11/04/2012
- * @version 0.0.4
+ * @modified 16/04/2012
+ * @version 0.0.5
  */
 "use strict";
 
@@ -15,13 +15,6 @@ var PATH = require ("path");
 
 var BUFFER_SIZE = 16384;
 var SLASH = PATH.normalize ("/");
-
-var getFileName = function (fileName){
-	var main = process.mainModule.filename;
-	var cwd = main.substring (0, main.lastIndexOf (SLASH));
-	var relative = PATH.relative (process.cwd (), cwd);
-	return PATH.join (relative, fileName);
-};
 
 var BufferedReader = function (fileName, bufferSize, encoding){
 	EVENTS.EventEmitter.call (this);
@@ -40,7 +33,7 @@ var BufferedReader = function (fileName, bufferSize, encoding){
 		bufferSize: bufferSize
 	};
 	
-	this._fileName = getFileName (fileName);
+	this._fileName = fileName;
 };
 
 BufferedReader.prototype = Object.create (EVENTS.EventEmitter.prototype);
@@ -49,7 +42,6 @@ BufferedReader.prototype.constructor = BufferedReader;
 BufferedReader.prototype.read = function (){
 	var stream = FS.createReadStream (this._fileName, this._settings);
 	
-	var me = this;
 	var lastChunk;
 	var buffer;
 	var me = this;

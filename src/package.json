@@ -3,7 +3,7 @@
 	"author": {
 		"name":			"Gabriel Llamas"
 	},
-	"version":			"0.0.4",
+	"version":			"0.0.5",
 	"description":		"Fully configurable buffered reader.",
 	"repository": {
 		"type": 		"git",

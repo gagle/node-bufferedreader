@@ -7,7 +7,7 @@ Node BufferedReader
 
 [Availability](#availability) | [Compatibility](#compatibility) | [Documentation](#documentation)
 
-Version: 0.0.4
+Version: 0.0.5
 
 <a name="availability"></a>
 #### Availability [↑](#start) ####

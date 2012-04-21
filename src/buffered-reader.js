@@ -5,7 +5,7 @@
  * @author Gabriel Llamas
  * @created 10/04/2012
  * @modified 16/04/2012
- * @version 0.0.5
+ * @version 0.0.6
  */
 "use strict";
 
@@ -105,4 +105,4 @@ BufferedReader.prototype.read = function (){
 	});
 };
 
-module.exports.BufferedReader = BufferedReader;
+module.exports = BufferedReader;

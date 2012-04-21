@@ -1,4 +1,4 @@
-var BufferedReader = require ("../build/buffered-reader").BufferedReader;
+var BufferedReader = require ("../build/buffered-reader");
 
 /**
 Two ways to read one character at a time:

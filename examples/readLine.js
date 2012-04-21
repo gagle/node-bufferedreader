@@ -1,4 +1,4 @@
-var BufferedReader = require ("../build/buffered-reader").BufferedReader;
+var BufferedReader = require ("../build/buffered-reader");
 
 new BufferedReader ("lorem ipsum", "utf8")
 	.on ("error", function (error){

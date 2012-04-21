@@ -1,1 +1,1 @@
-var BufferedReader = require ("../build/buffered-reader").BufferedReader;
+var BufferedReader = require ("../build/buffered-reader");

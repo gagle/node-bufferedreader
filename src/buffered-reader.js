@@ -14,7 +14,6 @@ var FS = require ("fs");
 var PATH = require ("path");
 
 var BUFFER_SIZE = 16384;
-var SLASH = PATH.normalize ("/");
 
 var BufferedReader = function (fileName, bufferSize, encoding){
 	EVENTS.EventEmitter.call (this);

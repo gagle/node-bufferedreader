@@ -7,7 +7,11 @@ Node BufferedReader
 
 [Availability](#availability) | [Compatibility](#compatibility) | [Documentation](#documentation)
 
-Version: 0.0.6
+Version: 0.1.0
+
+When you need to read a file you typically read a chunk of bytes called "buffer" to avoid multiple calls to the underliying I/O layer, so instead of reading directly from the disk, you read from the previous filled buffer. Doing that you win performance.
+
+This library allows you to read files using internal buffers, so you don't have to worry about them. In addition, you can read a text file line by line.
 
 <a name="availability"></a>
 #### Availability [↑](#start) ####

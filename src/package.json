@@ -1,8 +1,9 @@
 {
 	"name": "buffered-reader",
-	"version": "0.0.6",
+	"version": "0.1.0",
 	"description": "Fully configurable buffered reader.",
-	"keywords": ["buffer", "reader", "line", "read line", "read file", "read text file", "file"],
+	"keywords": ["buffer", "reader", "line", "read line", "file", "read file", "read text file",
+		"read binary file", "binary"],
 	"author": {
 		"name": "Gabriel Llamas"
 	},

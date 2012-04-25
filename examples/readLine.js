@@ -6,5 +6,8 @@ new BufferedReader ("lorem ipsum", "utf8")
 	})
 	.on ("line", function (line){
 		console.log ("line: " + line);
+		if (line === "Phasellus pulvinar mauris in purus consequat vel congue orci hendrerit."){
+			this.interrupt ();
+		}
 	})
 	.read ();

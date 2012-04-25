@@ -5,7 +5,7 @@
  * @author Gabriel Llamas
  * @created 10/04/2012
  * @modified 25/04/2012
- * @version 0.1.0
+ * @version 0.1.1
  */
 "use strict";
 
@@ -38,6 +38,7 @@ var BufferedReader = function (fileName, bufferSize, encoding){
 	};
 	
 	this._fileName = fileName;
+	this._interrupted = false;
 	this._fd = null;
 	this._buffer = null;
 	this._fileOffset = 0;
@@ -50,6 +51,10 @@ var BufferedReader = function (fileName, bufferSize, encoding){
 
 BufferedReader.prototype = Object.create (EVENTS.EventEmitter.prototype);
 BufferedReader.prototype.constructor = BufferedReader;
+
+BufferedReader.prototype.interrupt = function (){
+	this._interrupted = true;
+};
 
 BufferedReader.prototype.read = function (){
 	var stream = FS.createReadStream (this._fileName, this._settings);
@@ -70,6 +75,8 @@ BufferedReader.prototype.read = function (){
 		
 		if (loop){
 			for (var i=0; i<len; i++){
+				if (me._interrupted) break;
+				
 				character = data[i];
 				if (stream.encoding){
 					me.emit ("character", character === "\r" ? "\n" : character);
@@ -102,17 +109,23 @@ BufferedReader.prototype.read = function (){
 		}
 		
 		me.emit ("buffer", data);
+		if (me._interrupted){
+			me._interrupted = false;
+			stream.destroy ();
+			me.emit ("end");
+		}
 	});
 	
 	stream.on ("end", function (){
+		me._interrupted = false;
 		if (loop && lastChunk){
 			me.emit ("line", lastChunk);
 		}
-		
 		me.emit ("end");
 	});
 	
 	stream.on ("error", function (error){
+		me._interrupted = false;
 		me.emit ("error", error);
 	});
 };

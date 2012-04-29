@@ -4,8 +4,8 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 25/04/2012
- * @version 0.1.1
+ * @modified 29/04/2012
+ * @version 0.1.2
  */
 "use strict";
 
@@ -175,32 +175,15 @@ BufferedReader.prototype._read = function (cb){
 	});
 };
 
-BufferedReader.prototype.close = function (cb){
-	if (cb) cb = cb.bind (this);
-	if (!this._fd){
-		if (cb) cb (null);
-		return;
-	}
-	
-	var me = this;
-	FS.close (this._fd, function (error){
-		me._fd = null;
-		me._buffer = null;
-		if (cb) cb.call (me, error);
-	});
-};
-
-BufferedReader.prototype.readBytes = function (bytes, cb){
-	cb = cb.bind (this);
-	if (bytes < 1) return cb (INVALID_BYTES_RANGE_ERROR, null, -1);
-	if (this._eof) return cb (null, null, 0);
-	
+BufferedReader.prototype._readBytes = function (bytes, read, cb){
 	var fill = function (){
 		var endData = bytes - me._dataOffset;
 		var endBuffer = me._buffer.length - me._bufferOffset;
 		var end = endData > endBuffer ? endBuffer : endData;
 		
-		me._buffer.copy (data, me._dataOffset, me._bufferOffset, me._bufferOffset + end);
+		if (read){
+			me._buffer.copy (data, me._dataOffset, me._bufferOffset, me._bufferOffset + end);
+		}
 		me._bufferOffset += end;
 		if (me._bufferOffset === me._buffer.length) me._bufferOffset = 0;
 		me._dataOffset += end;
@@ -214,7 +197,7 @@ BufferedReader.prototype.readBytes = function (bytes, cb){
 				me._eof = true;
 				end = me._dataOffset;
 				me._dataOffset = 0;
-				cb (null, data.slice (0, end), end);
+				cb (null, read ? data.slice (0, end) : data, end);
 			}else{
 				me._read (function (error){
 					if (error) return cb (error, null, -1);
@@ -226,7 +209,10 @@ BufferedReader.prototype.readBytes = function (bytes, cb){
 	};
 	
 	var me = this;
-	var data = new Buffer (bytes);
+	var data = null;
+	if (read){
+		data = new Buffer (bytes);
+	}
 	
 	this._open (function (error, fd){
 		if (error) return cb (error, null, -1);
@@ -237,17 +223,19 @@ BufferedReader.prototype.readBytes = function (bytes, cb){
 			var end = me._bufferOffset + bytes;
 			
 			if (end <= len){
-				me._buffer.copy (data, 0, me._bufferOffset, end);
+				if (read){
+					me._buffer.copy (data, 0, me._bufferOffset, end);
+				}
 				me._bufferOffset = end;
 				cb (null, data, bytes);
 			}else{
 				var last = len - me._bufferOffset;
-				if (last !== 0){
+				if (last !== 0 && read){
 					me._buffer.copy (data, 0, me._bufferOffset, me._bufferOffset + last);
 				}
 				if (me._noMoreBuffers){
 					me._eof = true;
-					return cb (null, data.slice (0, last), last);
+					return cb (null, read ? data.slice (0, last) : data, last);
 				}
 				
 				me._read (function (error){
@@ -257,12 +245,16 @@ BufferedReader.prototype.readBytes = function (bytes, cb){
 					var remaining = bytes - last;
 					if (len <= remaining){
 						me._eof = true;
-						me._buffer.copy (data, last, 0, len);
+						if (read){
+							me._buffer.copy (data, last, 0, len);
+						}
 						var lastChunk = last + len;
-						cb (null, data.slice (0, lastChunk), lastChunk);
+						cb (null, read ? data.slice (0, lastChunk) : data, lastChunk);
 					}else{
 						me._bufferOffset = remaining;
-						me._buffer.copy (data, last, 0, me._bufferOffset);
+						if (read){
+							me._buffer.copy (data, last, 0, me._bufferOffset);
+						}
 						cb (null, data, bytes);
 					}
 				});
@@ -270,6 +262,39 @@ BufferedReader.prototype.readBytes = function (bytes, cb){
 		}else{
 			fill ();
 		}
+	});
+};
+
+BufferedReader.prototype.close = function (cb){
+	if (cb) cb = cb.bind (this);
+	if (!this._fd){
+		if (cb) cb (null);
+		return;
+	}
+	
+	var me = this;
+	FS.close (this._fd, function (error){
+		me._fd = null;
+		me._buffer = null;
+		if (cb) cb (error);
+	});
+};
+
+BufferedReader.prototype.readBytes = function (bytes, cb){
+	cb = cb.bind (this);
+	if (bytes < 1) return cb (INVALID_BYTES_RANGE_ERROR, null, -1);
+	if (this._eof) return cb (null, null, 0);
+	
+	this._readBytes (bytes, true, cb);
+};
+
+BufferedReader.prototype.skip = function (bytes, cb){
+	cb = cb.bind (this);
+	if (bytes < 1) return cb (INVALID_BYTES_RANGE_ERROR, -1);
+	if (this._eof) return cb (null, 0);
+	
+	this._readBytes (bytes, false, function (error, bytes, bytesRead){
+		cb (error, bytesRead);
 	});
 };
 

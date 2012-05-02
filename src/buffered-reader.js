@@ -328,24 +328,37 @@ BufferedReader.prototype.seek = function (offset, cb){
 	cb = cb.bind (this);
 	if (offset < 0) return cb (new Error (INVALID_SEEK_OFFSET));
 	
-	offset += this._settings.start;
-	if (offset >= this._settings.end + 1){
-		this._isEOF = true;
-	}else{
-		this._isEOF = false;
-		var start = this._fileOffset - this._buffer.length;
-		if (offset >= start && offset < this._fileOffset){
-			this._bufferOffset = offset - start;
-			this._realOffset = offset;
+	var seek = function (){
+		offset += me._settings.start;
+		if (offset >= me._settings.end + 1){
+			me._isEOF = true;
 		}else{
-			this._needRead = true;
-			this._noMoreBuffers = false;
-			this._fileOffset = offset;
-			this._bufferOffset = 0;
-			this._realOffset = offset;
+			me._isEOF = false;
+			var start = me._fileOffset - (me._buffer ? me._buffer.length : 0);
+			if (offset >= start && offset < me._fileOffset){
+				me._bufferOffset = offset - start;
+				me._realOffset = offset;
+			}else{
+				me._needRead = me._fd ? true : false;
+				me._noMoreBuffers = false;
+				me._fileOffset = offset;
+				me._bufferOffset = 0;
+				me._realOffset = offset;
+			}
 		}
+		cb (null);
+	};
+	
+	var me = this;
+	if (!this._initialized){
+		this._init (function (error){
+			if (error) return cb (error, null);
+			me._initialized = true;
+			seek ();
+		});
+	}else{
+		seek ();
 	}
-	cb (null);
 };
 
 BufferedReader.prototype.skip = function (bytes, cb){

@@ -9,7 +9,7 @@ Two ways to read one character at a time:
 
 console.log ("\"buffer\" event: ");
 
-new BufferedReader ("lorem ipsum 2", 1, "utf8")
+new BufferedReader ("lorem ipsum 2", { encoding: "utf8", bufferSize: 1 })
 	.on ("error", function (error){
 		console.log ("error: " + error);
 	})
@@ -19,7 +19,7 @@ new BufferedReader ("lorem ipsum 2", 1, "utf8")
 	.on ("end", function (){
 		console.log ("\n\"character\" event: ");
 		
-		new BufferedReader ("lorem ipsum 2", "utf8")
+		new BufferedReader ("lorem ipsum 2", { encoding: "utf8" })
 			.on ("error", function (error){
 				console.log ("error: " + error);
 			})

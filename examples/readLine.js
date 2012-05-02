@@ -1,6 +1,6 @@
 var BufferedReader = require ("../build/buffered-reader");
 
-new BufferedReader ("lorem ipsum", "utf8")
+new BufferedReader ("lorem ipsum", { encoding: "utf8" })
 	.on ("error", function (error){
 		console.log ("error: " + error);
 	})

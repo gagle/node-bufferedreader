@@ -4,8 +4,8 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 29/04/2012
- * @version 0.1.2
+ * @modified 01/05/2012
+ * @version 0.2.0
  */
 "use strict";
 
@@ -14,39 +14,47 @@ var FS = require ("fs");
 
 var BUFFER_SIZE = 16384;
 
-var INVALID_BUFFER_SIZE = new Error ("The buffer size must be greater than 0.");
-var INVALID_BYTES_RANGE_ERROR = new Error ("The number of bytes must be greater than 0.");
-var NO_FILE_ERROR = new Error ("The source is not a file.");
+var INVALID_BUFFER_SIZE = "The buffer size must be greater than 0.";
+var INVALID_START_OFFSET = "The start offset must be greater than or equals to 0.";
+var INVALID_END_OFFSET = "The end offset must be greater than or equals to 0.";
+var INVALID_RANGE_OFFSET = "The end offset must be greater than or equals to the start offset.";
+var INVALID_BYTES_RANGE_ERROR = "The number of bytes to read must be greater than 0.";
+var INVALID_SEEK_OFFSET = "The offset must be greater than or equals to 0.";
+var NO_FILE_ERROR = "The source is not a file.";
 
-var BufferedReader = function (fileName, bufferSize, encoding){
+var BufferedReader = function (fileName, settings){
 	EVENTS.EventEmitter.call (this);
 	
-	var argsLen = arguments.length;
-	if (argsLen === 1){
-		bufferSize = BUFFER_SIZE;
-		encoding = null;
-	}else if (argsLen === 2 && typeof bufferSize === "string"){
-		encoding = bufferSize;
-		bufferSize = BUFFER_SIZE;
-	}
+	settings = settings || {};
 	
-	if (bufferSize < 1) throw INVALID_BUFFER_SIZE;
-	
+	if (settings.bufferSize === 0) settings.bufferSize = -1;
 	this._settings = {
-		encoding: encoding,
-		bufferSize: bufferSize
+		bufferSize: settings.bufferSize || BUFFER_SIZE,
+		encoding: settings.encoding || null,
+		start: settings.start || 0,
+		end: settings.end
 	};
 	
+	if (this._settings.bufferSize < 1) throw new Error (INVALID_BUFFER_SIZE);
+	if (this._settings.start < 0) throw new Error (INVALID_START_OFFSET);
+	if (this._settings.end < 0) throw new Error (INVALID_END_OFFSET);
+	if (this._settings.end < this._settings.start) throw new Error (INVALID_RANGE_OFFSET);
+	
 	this._fileName = fileName;
-	this._interrupted = false;
 	this._fd = null;
 	this._buffer = null;
-	this._fileOffset = 0;
+	
+	this._fileOffset = this._settings.start;
 	this._bufferOffset = 0;
-	this._eof = false;
-	this._noMoreBuffers = false;
-	this._fileSize = null;
 	this._dataOffset = 0;
+	this._realOffset = this._settings.start;
+	
+	this._fileSize = null;
+	this._initialized = false;
+	this._interrupted = false;
+	this._isEOF = false;
+	this._noMoreBuffers = false;
+	this._needRead = false;
 };
 
 BufferedReader.prototype = Object.create (EVENTS.EventEmitter.prototype);
@@ -130,29 +138,25 @@ BufferedReader.prototype.read = function (){
 	});
 };
 
-BufferedReader.prototype._open = function (cb){
-	if (this._fd) return cb (null, this._fd);
-	
+BufferedReader.prototype._init = function (cb){
 	var me = this;
 	FS.stat (this._fileName, function (error, stats){
-		if (error) return cb (error, null);
+		if (error) return cb (error);
 		if (stats.isFile ()){
-			FS.open (me._fileName, "r", function (error, fd){
-				if (error) return cb (error, null);
-				
-				me._fileSize = stats.size;
-				me._fd = fd;
-				me._buffer = new Buffer (me._settings.bufferSize);
-				me._read (function (error){
-					if (error){
-						return cb (error, null);
-					}else{
-						cb (null, me._fd);
-					}
-				});
-			});
+			if (me._settings.start >= stats.size){
+				me._isEOF = true;
+				return cb (null);
+			}
+			if (!me._settings.end && me._settings.end !== 0){
+				me._settings.end = stats.size;
+			}
+			if (me._settings.end >= stats.size){
+				me._settings.end = stats.size - 1;
+			}
+			me._fileSize = stats.size;
+			cb (null);
 		}else{
-			cb (NO_FILE_ERROR, null);
+			cb (new Error (NO_FILE_ERROR));
 		}
 	});
 };
@@ -163,7 +167,6 @@ BufferedReader.prototype._read = function (cb){
 	FS.read (this._fd, this._buffer, 0, size, this._fileOffset, function (error, bytesRead){
 		if (error) return cb (error);
 		
-		me._bufferValidSize = bytesRead;
 		me._fileOffset += bytesRead;
 		if (me._fileOffset === me._fileSize){
 			me._noMoreBuffers = true;
@@ -171,34 +174,48 @@ BufferedReader.prototype._read = function (cb){
 		if (bytesRead < size){
 			me._buffer = me._buffer.slice (0, bytesRead);
 		}
-		cb ();
+		cb (null);
 	});
 };
 
-BufferedReader.prototype._readBytes = function (bytes, read, cb){
+BufferedReader.prototype._readBytes = function (bytes, cb){
+	if (this._needRead){
+		this._needRead = false;
+		var me = this;
+		this._read (function (error){
+			if (error) return cb (error, null, -1);
+			me._readBytes (bytes, cb);
+		});
+		return;
+	}
+
 	var fill = function (){
 		var endData = bytes - me._dataOffset;
 		var endBuffer = me._buffer.length - me._bufferOffset;
-		var end = endData > endBuffer ? endBuffer : endData;
+		var end = endBuffer <= endData ? endBuffer : endData;
 		
-		if (read){
-			me._buffer.copy (data, me._dataOffset, me._bufferOffset, me._bufferOffset + end);
-		}
+		me._buffer.copy (data, me._dataOffset, me._bufferOffset, me._bufferOffset + end);
 		me._bufferOffset += end;
-		if (me._bufferOffset === me._buffer.length) me._bufferOffset = 0;
+		me._realOffset += end;
+		
+		if (me._bufferOffset === me._buffer.length){
+			me._bufferOffset = 0;
+			me._needRead = true;
+		}
 		me._dataOffset += end;
 		
 		if (me._dataOffset === bytes){
 			me._dataOffset = 0;
-			me._eof = me._noMoreBuffers;
+			me._isEOF = me._noMoreBuffers;
 			cb (null, data, bytes);
 		}else{
 			if (me._noMoreBuffers){
-				me._eof = true;
+				me._isEOF = true;
 				end = me._dataOffset;
 				me._dataOffset = 0;
-				cb (null, read ? data.slice (0, end) : data, end);
+				cb (null, data.slice (0, end), end);
 			}else{
+				me._needRead = false;
 				me._read (function (error){
 					if (error) return cb (error, null, -1);
 					
@@ -209,60 +226,56 @@ BufferedReader.prototype._readBytes = function (bytes, read, cb){
 	};
 	
 	var me = this;
-	var data = null;
-	if (read){
-		data = new Buffer (bytes);
-	}
+
+	var max = me._settings.end - me._realOffset + 1;
+	bytes = max < bytes ? max : bytes;
+	if (bytes === 0) return cb (null, null, 0);
 	
-	this._open (function (error, fd){
-		if (error) return cb (error, null, -1);
+	var data = new Buffer (bytes);
+	var len = me._buffer.length;
+	
+	if (bytes <= len){
+		var end = me._bufferOffset + bytes;
 		
-		var len = me._buffer.length;
-		
-		if (bytes < len){
-			var end = me._bufferOffset + bytes;
-			
-			if (end <= len){
-				if (read){
-					me._buffer.copy (data, 0, me._bufferOffset, end);
-				}
-				me._bufferOffset = end;
-				cb (null, data, bytes);
-			}else{
-				var last = len - me._bufferOffset;
-				if (last !== 0 && read){
-					me._buffer.copy (data, 0, me._bufferOffset, me._bufferOffset + last);
-				}
-				if (me._noMoreBuffers){
-					me._eof = true;
-					return cb (null, read ? data.slice (0, last) : data, last);
-				}
-				
-				me._read (function (error){
-					if (error) return cb (error, null);
-					
-					len = me._buffer.length;
-					var remaining = bytes - last;
-					if (len <= remaining){
-						me._eof = true;
-						if (read){
-							me._buffer.copy (data, last, 0, len);
-						}
-						var lastChunk = last + len;
-						cb (null, read ? data.slice (0, lastChunk) : data, lastChunk);
-					}else{
-						me._bufferOffset = remaining;
-						if (read){
-							me._buffer.copy (data, last, 0, me._bufferOffset);
-						}
-						cb (null, data, bytes);
-					}
-				});
-			}
+		if (end <= len){
+			me._buffer.copy (data, 0, me._bufferOffset, end);
+			me._bufferOffset = end;
+			me._realOffset += bytes;
+			cb (null, data, bytes);
 		}else{
-			fill ();
+			var last = len - me._bufferOffset;
+			me._realOffset += last;
+			
+			if (last !== 0){
+				me._buffer.copy (data, 0, me._bufferOffset, me._bufferOffset + last);
+			}
+			if (me._noMoreBuffers){
+				me._isEOF = true;
+				return cb (null, data.slice (0, last), last);
+			}
+			
+			me._read (function (error){
+				if (error) return cb (error, null, -1);
+				
+				len = me._buffer.length;
+				var remaining = bytes - last;
+				if (len <= remaining){
+					me._realOffset += len;
+					me._isEOF = true;
+					me._buffer.copy (data, last, 0, len);
+					var lastChunk = last + len;
+					cb (null, data.slice (0, lastChunk), lastChunk);
+				}else{
+					me._realOffset += remaining;
+					me._bufferOffset = remaining;
+					me._buffer.copy (data, last, 0, me._bufferOffset);
+					cb (null, data, bytes);
+				}
+			});
 		}
-	});
+	}else{
+		fill ();
+	}
 };
 
 BufferedReader.prototype.close = function (cb){
@@ -282,20 +295,81 @@ BufferedReader.prototype.close = function (cb){
 
 BufferedReader.prototype.readBytes = function (bytes, cb){
 	cb = cb.bind (this);
-	if (bytes < 1) return cb (INVALID_BYTES_RANGE_ERROR, null, -1);
-	if (this._eof) return cb (null, null, 0);
+	if (bytes < 1 || this._isEOF) return cb (null, null, 0);
 	
-	this._readBytes (bytes, true, cb);
+	var open = function (){
+		if (me._isEOF) return cb (null, null, 0);
+		FS.open (me._fileName, "r", function (error, fd){
+			if (error) return cb (error, null, -1);
+			
+			me._fd = fd;
+			me._buffer = new Buffer (me._settings.bufferSize);
+			me._read (function (error){
+				if (error) return cb (error, null, -1);
+				me._readBytes (bytes, cb);
+			});
+		});
+	};
+	
+	var me = this;
+	if (!this._initialized){
+		this._init (function (error){
+			if (error) return cb (error, null);
+			me._initialized = true;
+			open ();
+		});
+	}else{
+		if (!this._fd) return open ();
+		this._readBytes (bytes, cb);
+	}
+};
+
+BufferedReader.prototype.seek = function (offset, cb){
+	cb = cb.bind (this);
+	if (offset < 0) return cb (new Error (INVALID_SEEK_OFFSET));
+	
+	offset += this._settings.start;
+	if (offset >= this._settings.end + 1){
+		this._isEOF = true;
+	}else{
+		this._isEOF = false;
+		var start = this._fileOffset - this._buffer.length;
+		if (offset >= start && offset < this._fileOffset){
+			this._bufferOffset = offset - start;
+			this._realOffset = offset;
+		}else{
+			this._needRead = true;
+			this._noMoreBuffers = false;
+			this._fileOffset = offset;
+			this._bufferOffset = 0;
+			this._realOffset = offset;
+		}
+	}
+	cb (null);
 };
 
 BufferedReader.prototype.skip = function (bytes, cb){
 	cb = cb.bind (this);
-	if (bytes < 1) return cb (INVALID_BYTES_RANGE_ERROR, -1);
-	if (this._eof) return cb (null, 0);
+	if (bytes < 1 || this._isEOF) return cb (null, 0);
 	
-	this._readBytes (bytes, false, function (error, bytes, bytesRead){
-		cb (error, bytesRead);
-	});
+	var skip = function (){
+		var remaining = me._settings.end - me._realOffset + 1;
+		bytes = bytes <= remaining ? bytes : remaining;
+		me.seek (me._realOffset - me._settings.start + bytes, function (){
+			cb (null, bytes);
+		});
+	};
+	
+	var me = this;
+	if (!this._initialized){
+		this._init (function (error){
+			if (error) return cb (error, null);
+			me._initialized = true;
+			skip ();
+		});
+	}else{
+		skip ();
+	}
 };
 
 module.exports = BufferedReader;

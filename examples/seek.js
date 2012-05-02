@@ -1,4 +1,4 @@
-var BufferedReader = require ("../src/buffered-reader");
+var BufferedReader = require ("../build/buffered-reader");
 
 new BufferedReader ("file", { start: 3, end: 6 }).seek (1, function (error){
 	if (error) return console.log (error);

@@ -13,6 +13,7 @@ var EVENTS = require ("events");
 var FS = require ("fs");
 
 var BUFFER_SIZE = 16384;
+var WIN = process.platform.indexOf ("win") !== -1;
 
 var INVALID_BUFFER_SIZE = "The buffer size must be greater than 0.";
 var INVALID_START_OFFSET = "The start offset must be greater than or equals to 0.";
@@ -64,10 +65,15 @@ BufferedReader.prototype.interrupt = function (){
 	this._interrupted = true;
 };
 
+var realByteLength = function (character, encoding){
+	return Buffer.byteLength (character, encoding);
+};
+
 BufferedReader.prototype.read = function (){
 	var stream = FS.createReadStream (this._fileName, this._settings);
 	
 	var lastChunk;
+	var byteOffset = 0;
 	var me = this;
 	
 	var onChar = this.listeners ("character").length !== 0;
@@ -80,22 +86,28 @@ BufferedReader.prototype.read = function (){
 		var chunk;
 		var character;
 		var len = data.length;
+		var isCR = false;
 		
 		if (loop){
 			for (var i=0; i<len; i++){
 				if (me._interrupted) break;
 				
 				character = data[i];
-				if (stream.encoding){
-					if (onChar) me.emit ("character", character === "\r" ? "\n" : character);
-				}else{
+				if (!stream.encoding){
 					if (onByte) me.emit ("byte", character);
 					continue;
 				}
 				
-				if (!onLine) continue;
-				if (character === "\n" || character === "\r"){
-					chunk = data.slice (offset, i);
+				byteOffset += realByteLength (character, me._settings.encoding);
+				if (onChar) me.emit ("character", character, byteOffset);
+				
+				if (character === "\r"){
+					isCR = true;
+					continue;
+				}
+				
+				if (character === "\n"){
+					chunk = data.slice (offset, isCR ? i - 1 : i);
 					offset = i + 1;
 					
 					if (lastChunk){
@@ -103,21 +115,19 @@ BufferedReader.prototype.read = function (){
 						lastChunk = null;
 					}
 					
-					if (i + 1 !== len && character === "\r" && data[i + 1] === "\n"){
-						i++;
-					}
-					
-					me.emit ("line", chunk);
+					me.emit ("line", chunk, byteOffset);
 				}
+				
+				isCR = false;
 			}
 			
-			if (onLine && stream.encoding && offset !== len){
+			if (stream.encoding && offset !== len){
 				var s = offset === 0 ? data : data.slice (offset);
 				lastChunk = lastChunk ? lastChunk.concat (s) : s;
 			}
 		}
 		
-		me.emit ("buffer", data);
+		me.emit ("buffer", data, byteOffset);
 		if (me._interrupted){
 			me._interrupted = false;
 			stream.destroy ();
@@ -128,7 +138,7 @@ BufferedReader.prototype.read = function (){
 	stream.on ("end", function (){
 		me._interrupted = false;
 		if (loop && lastChunk){
-			me.emit ("line", lastChunk);
+			me.emit ("line", lastChunk, byteOffset);
 		}
 		me.emit ("end");
 	});

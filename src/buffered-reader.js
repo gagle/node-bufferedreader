@@ -5,7 +5,7 @@
  * @author Gabriel Llamas
  * @created 10/04/2012
  * @modified 13/05/2012
- * @version 0.2.1
+ * @version 0.2.2
  */
 "use strict";
 
@@ -13,7 +13,6 @@ var EVENTS = require ("events");
 var FS = require ("fs");
 
 var BUFFER_SIZE = 16384;
-var WIN = process.platform.indexOf ("win") !== -1;
 
 var INVALID_BUFFER_SIZE = "The buffer size must be greater than 0.";
 var INVALID_START_OFFSET = "The start offset must be greater than or equals to 0.";
@@ -56,20 +55,21 @@ var BufferedReader = function (fileName, settings){
 	this._isEOF = false;
 	this._noMoreBuffers = false;
 	this._needRead = false;
+	
+	this._reading = false;
 };
 
 BufferedReader.prototype = Object.create (EVENTS.EventEmitter.prototype);
 BufferedReader.prototype.constructor = BufferedReader;
 
 BufferedReader.prototype.interrupt = function (){
-	this._interrupted = true;
-};
-
-var realByteLength = function (character, encoding){
-	return Buffer.byteLength (character, encoding);
+	if (this._reading){
+		this._interrupted = true;
+	}
 };
 
 BufferedReader.prototype.read = function (){
+	this._reading = true;
 	var stream = FS.createReadStream (this._fileName, this._settings);
 	
 	var lastChunk;
@@ -98,7 +98,7 @@ BufferedReader.prototype.read = function (){
 					continue;
 				}
 				
-				byteOffset += realByteLength (character, me._settings.encoding);
+				byteOffset += Buffer.byteLength (character, me._settings.encoding);
 				if (onChar) me.emit ("character", character, byteOffset);
 				
 				if (character === "\r"){
@@ -140,6 +140,7 @@ BufferedReader.prototype.read = function (){
 		if (loop && lastChunk){
 			me.emit ("line", lastChunk, byteOffset);
 		}
+		this._reading = false;
 		me.emit ("end");
 	});
 	

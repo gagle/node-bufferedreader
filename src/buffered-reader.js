@@ -94,7 +94,8 @@ BufferedReader.prototype.read = function (){
 				
 				character = data[i];
 				if (!stream.encoding){
-					if (onByte) me.emit ("byte", character);
+					byteOffset++;
+					if (onByte) me.emit ("byte", character, byteOffset);
 					continue;
 				}
 				

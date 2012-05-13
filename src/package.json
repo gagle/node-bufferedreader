@@ -1,6 +1,6 @@
 {
 	"name": "buffered-reader",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Fully configurable buffered reader.",
 	"keywords": ["buffer", "reader", "line", "read line", "file", "read file", "read text file",
 		"read binary file", "binary"],

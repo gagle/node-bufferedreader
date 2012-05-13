@@ -4,8 +4,8 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 01/05/2012
- * @version 0.2.0
+ * @modified 13/05/2012
+ * @version 0.2.1
  */
 "use strict";
 
@@ -68,14 +68,14 @@ BufferedReader.prototype.read = function (){
 	var stream = FS.createReadStream (this._fileName, this._settings);
 	
 	var lastChunk;
-	var buffer;
 	var me = this;
 	
-	var loop = this.listeners ("character").length !== 0 || this.listeners ("line").length !== 0 ||
-		this.listeners ("byte").length !== 0;
+	var onChar = this.listeners ("character").length !== 0;
+	var onLine = this.listeners ("line").length !== 0;
+	var onByte = this.listeners ("byte").length !== 0;
+	var loop = onChar || onLine || onByte;
 	
 	stream.on ("data", function (data){
-		buffer = data;
 		var offset = 0;
 		var chunk;
 		var character;
@@ -87,12 +87,13 @@ BufferedReader.prototype.read = function (){
 				
 				character = data[i];
 				if (stream.encoding){
-					me.emit ("character", character === "\r" ? "\n" : character);
+					if (onChar) me.emit ("character", character === "\r" ? "\n" : character);
 				}else{
-					me.emit ("byte", character);
+					if (onByte) me.emit ("byte", character);
 					continue;
 				}
 				
+				if (!onLine) continue;
 				if (character === "\n" || character === "\r"){
 					chunk = data.slice (offset, i);
 					offset = i + 1;
@@ -110,7 +111,7 @@ BufferedReader.prototype.read = function (){
 				}
 			}
 			
-			if (stream.encoding && offset !== len){
+			if (onLine && stream.encoding && offset !== len){
 				var s = offset === 0 ? data : data.slice (offset);
 				lastChunk = lastChunk ? lastChunk.concat (s) : s;
 			}

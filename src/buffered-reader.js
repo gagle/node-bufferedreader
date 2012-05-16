@@ -4,8 +4,8 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 13/05/2012
- * @version 0.2.2
+ * @modified 16/05/2012
+ * @version 0.2.3
  */
 "use strict";
 
@@ -72,7 +72,7 @@ BufferedReader.prototype.read = function (){
 	this._reading = true;
 	var stream = FS.createReadStream (this._fileName, this._settings);
 	
-	var lastChunk;
+	var lastChunk = null;
 	var byteOffset = 0;
 	var me = this;
 	
@@ -102,6 +102,8 @@ BufferedReader.prototype.read = function (){
 				byteOffset += Buffer.byteLength (character, me._settings.encoding);
 				if (onChar) me.emit ("character", character, byteOffset);
 				
+				if (!onLine) continue;
+				
 				if (character === "\r"){
 					isCR = true;
 					continue;
@@ -122,7 +124,7 @@ BufferedReader.prototype.read = function (){
 				isCR = false;
 			}
 			
-			if (stream.encoding && offset !== len){
+			if (onLine && stream.encoding && offset !== len){
 				var s = offset === 0 ? data : data.slice (offset);
 				lastChunk = lastChunk ? lastChunk.concat (s) : s;
 			}

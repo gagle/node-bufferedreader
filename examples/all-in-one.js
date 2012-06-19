@@ -24,7 +24,7 @@ new BufferedReader ("lorem ipsum", { encoding: "utf8" })
 	})
 	.on ("end", function (){
 		this.seek (offset, function (error){
-			if (error) return handleError (this, error, function (){ /* Error correctly managed. */ });
+			if (error) return handleError (null, error, function (){ /* Error correctly managed. */ });
 			
 			this.readBytes (9, function (error, bytes, bytesRead){
 				if (error) return handleError (this, error, function (){ /* Error correctly managed. */ });

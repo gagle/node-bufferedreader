@@ -13,8 +13,8 @@ var handleError = function (bufferedReader, error, cb){
 new BufferedReader ("file").skip (2, function (error, skipped){
 	if (error) return handleError (null, error, function (){ /* Error correctly managed. */ });
 	
-	//Skipped 0x00, 0x01
-	//Prints 2
+	//Skipped 0x00, 0x11
+	//Prints: 2
 	console.log (skipped);
 	
 	this.readBytes (3, function (error, bytes, bytesRead){

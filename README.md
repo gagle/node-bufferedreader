@@ -38,5 +38,5 @@ Or simply copying `build/buffered-reader.js` into your project's directory and `
  
 [Reference](https://github.com/Gagle/Node-BufferedReader/wiki/Reference)  
 [Examples](https://github.com/Gagle/Node-BufferedReader/tree/master/examples)  
-[Change log](https://github.com/Gagle/Node-BufferedReader/wiki/Change-log)  
+[Change Log](https://github.com/Gagle/Node-BufferedReader/wiki/Change-Log)  
 [MIT License](https://github.com/Gagle/Node-BufferedReader/blob/master/LICENSE)

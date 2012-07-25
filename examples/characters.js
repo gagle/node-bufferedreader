@@ -7,15 +7,11 @@ Two ways to read one character at a time:
 - Using the "character" event.
 */
 
-var handleError = function (error){
-	console.log (error);
-};
-
 console.log ("\"buffer\" event: ");
 
 new BufferedReader ("lorem ipsum 2", { encoding: "utf8", bufferSize: 1 })
 	.on ("error", function (error){
-		handleError (error);
+		console.log (error);
 	})
 	.on ("buffer", function (buffer){
 		console.log ("buffer: " + buffer);
@@ -25,7 +21,7 @@ new BufferedReader ("lorem ipsum 2", { encoding: "utf8", bufferSize: 1 })
 		
 		new BufferedReader ("lorem ipsum 2", { encoding: "utf8" })
 			.on ("error", function (error){
-				handleError (error);
+				console.log (error);
 			})
 			.on ("character", function (character){
 				console.log ("character: " + character);

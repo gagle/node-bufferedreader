@@ -5,7 +5,7 @@
  * @author Gabriel Llamas
  * @created 10/04/2012
  * @modified 25/07/2012
- * @version 0.2.4
+ * @version 0.2.5
  */
 "use strict";
 
@@ -41,23 +41,7 @@ var BufferedReader = function (fileName, settings){
 	if (this._settings.end < this._settings.start) throw new Error (INVALID_RANGE_OFFSET);
 	
 	this._fileName = fileName;
-	this._fd = null;
-	this._buffer = null;
-	
-	this._fileOffset = this._settings.start;
-	this._bufferOffset = 0;
-	this._dataOffset = 0;
-	this._realOffset = this._settings.start;
-	
-	this._fileSize = null;
-	this._initialized = false;
-	this._interrupted = false;
-	this._isEOF = false;
-	this._noMoreBuffers = false;
-	this._needRead = false;
-	
-	this._reading = false;
-	this._stream = null;
+	this._reset ();
 };
 
 BufferedReader.prototype = Object.create (EVENTS.EventEmitter.prototype);
@@ -203,6 +187,26 @@ BufferedReader.prototype._readBytes = function (bytes, cb){
 	}
 };
 
+BufferedReader.prototype._reset = function (){
+	this._fd = null;
+	this._buffer = null;
+	
+	this._fileOffset = this._settings.start;
+	this._bufferOffset = 0;
+	this._dataOffset = 0;
+	this._realOffset = this._settings.start;
+	
+	this._fileSize = null;
+	this._initialized = false;
+	this._interrupted = false;
+	this._isEOF = false;
+	this._noMoreBuffers = false;
+	this._needRead = false;
+	
+	this._reading = false;
+	this._stream = null;
+};
+
 BufferedReader.prototype.close = function (cb){
 	if (cb) cb = cb.bind (this);
 	if (!this._fd){
@@ -212,9 +216,8 @@ BufferedReader.prototype.close = function (cb){
 	
 	var me = this;
 	FS.close (this._fd, function (error){
-		me._fd = null;
-		me._buffer = null;
-		if (cb) cb (error);
+		me._reset ();
+		if (cb) cb (error || null);
 	});
 };
 
@@ -332,13 +335,34 @@ BufferedReader.prototype.readBytes = function (bytes, cb){
 	var open = function (){
 		if (me._isEOF) return cb (null, null, 0);
 		FS.open (me._fileName, "r", function (error, fd){
-			if (error) return cb (error, null, -1);
+			if (error){
+				me.close (function (error){
+					cb (error, null, -1);
+				});
+				return;
+			}
 			
 			me._fd = fd;
 			me._buffer = new Buffer (me._settings.bufferSize);
+			
 			me._read (function (error){
-				if (error) return cb (error, null, -1);
-				me._readBytes (bytes, cb);
+				if (error){
+					me.close (function (error){
+						cb (error, null, -1);
+					});
+					return;
+				}
+				
+				me._readBytes (bytes, function (error, bytes, bytesRead){
+					if (error){
+						me.close (function (error){
+							cb (error, bytes, bytesRead);
+						});
+						return;
+					}
+					
+					cb (error, bytes, bytesRead);
+				});
 			});
 		});
 	};

@@ -1,15 +1,11 @@
 var BufferedReader = require ("../build/buffered-reader");
 
-var handleError = function (error){
-	console.log (error);
-};
-
 console.log ("First line, expected offset: 21");
 console.log ("Second line, expected offset: 61\n");
 
 new BufferedReader ("bmp", { encoding: "utf8", bufferSize: 4 })
 	.on ("error", function (error){
-		handleError (error);
+		console.log (error);
 	})
 	.on ("character", function (character, byteOffset){
 		console.log ("character: " + character + ", offset: " + byteOffset);

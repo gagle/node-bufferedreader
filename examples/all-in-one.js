@@ -1,15 +1,5 @@
 var BufferedReader = require ("../build/buffered-reader");
 
-var handleError = function (bufferedReader, error, cb){
-	console.log (error);
-	if (!bufferedReader) return cb ();
-	
-	bufferedReader.close (function (error){
-		if (error) console.log (error);
-		cb ();
-	});
-};
-
 var offset;
 
 new BufferedReader ("lorem ipsum", { encoding: "utf8" })
@@ -24,15 +14,15 @@ new BufferedReader ("lorem ipsum", { encoding: "utf8" })
 	})
 	.on ("end", function (){
 		this.seek (offset, function (error){
-			if (error) return handleError (null, error, function (){ /* Error correctly managed. */ });
+			if (error) return console.log (error);
 			
 			this.readBytes (9, function (error, bytes, bytesRead){
-				if (error) return handleError (this, error, function (){ /* Error correctly managed. */ });
+				if (error) return console.log (error);
 				
-				console.log (bytes.toString ());
+				console.log (bytes.toString ()); //Prints: Curabitur
 				
 				this.close (function (error){
-					if (error) handleError (null, error, function (){ /* Error correctly managed. */ });
+					if (error) console.log (error);
 				});
 			});
 		})

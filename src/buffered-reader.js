@@ -4,23 +4,32 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 25/07/2012
- * @version 0.2.5
+ * @modified 05/08/2012
+ * @version 0.2.6
  */
 "use strict";
 
 var EVENTS = require ("events");
 var FS = require ("fs");
 
-var BUFFER_SIZE = 16384;
+var Error = require ("errno-codes");
 
-var INVALID_BUFFER_SIZE = "The buffer size must be greater than 0.";
-var INVALID_START_OFFSET = "The start offset must be greater than or equals to 0.";
-var INVALID_END_OFFSET = "The end offset must be greater than or equals to 0.";
-var INVALID_RANGE_OFFSET = "The end offset must be greater than or equals to the start offset.";
-var INVALID_BYTES_RANGE_ERROR = "The number of bytes to read must be greater than 0.";
-var INVALID_SEEK_OFFSET = "The offset must be greater than or equals to 0.";
-var NO_FILE_ERROR = "The source is not a file.";
+Error.create ("INVALID_BUFFER_SIZE", Error.getNextAvailableErrorCode (),
+		"The buffer size must be greater than 0.");
+Error.create ("INVALID_START_OFFSET", Error.getNextAvailableErrorCode (),
+		"The start offset must be greater than or equals to 0.");
+Error.create ("INVALID_END_OFFSET", Error.getNextAvailableErrorCode (),
+		"The end offset must be greater than or equals to 0.");
+Error.create ("INVALID_RANGE_OFFSET", Error.getNextAvailableErrorCode (),
+		"The end offset must be greater than or equals to the start offset.");
+Error.create ("INVALID_BYTES_RANGE_ERROR", Error.getNextAvailableErrorCode (),
+		"The number of bytes to read must be greater than 0.");
+Error.create ("INVALID_SEEK_OFFSET", Error.getNextAvailableErrorCode (),
+		"The offset must be greater than or equals to 0.");
+Error.create ("NO_FILE", Error.getNextAvailableErrorCode (),
+		"The source is not a file.");
+
+var BUFFER_SIZE = 16384;
 
 var BufferedReader = function (fileName, settings){
 	EVENTS.EventEmitter.call (this);
@@ -35,10 +44,10 @@ var BufferedReader = function (fileName, settings){
 		end: settings.end
 	};
 	
-	if (this._settings.bufferSize < 1) throw new Error (INVALID_BUFFER_SIZE);
-	if (this._settings.start < 0) throw new Error (INVALID_START_OFFSET);
-	if (this._settings.end < 0) throw new Error (INVALID_END_OFFSET);
-	if (this._settings.end < this._settings.start) throw new Error (INVALID_RANGE_OFFSET);
+	if (this._settings.bufferSize < 1) throw Error.get (Error.INVALID_BUFFER_SIZE);
+	if (this._settings.start < 0) throw Error.get (Error.INVALID_START_OFFSET);
+	if (this._settings.end < 0) throw Error.get (Error.INVALID_END_OFFSET);
+	if (this._settings.end < this._settings.start) throw Error.get (Error.INVALID_RANGE_OFFSET);
 	
 	this._fileName = fileName;
 	this._reset ();
@@ -65,7 +74,7 @@ BufferedReader.prototype._init = function (cb){
 			me._fileSize = stats.size;
 			cb (null);
 		}else{
-			cb (new Error (NO_FILE_ERROR));
+			cb (Error.get (Error.NO_FILE));
 		}
 	});
 };
@@ -386,7 +395,7 @@ BufferedReader.prototype.resume = function (){
 
 BufferedReader.prototype.seek = function (offset, cb){
 	cb = cb.bind (this);
-	if (offset < 0) return cb (new Error (INVALID_SEEK_OFFSET));
+	if (offset < 0) return cb (Error.get (Error.INVALID_SEEK_OFFSET));
 	
 	var seek = function (){
 		offset += me._settings.start;

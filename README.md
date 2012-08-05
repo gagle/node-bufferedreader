@@ -17,7 +17,7 @@ This library allows you to read files using internal buffers, so you don't have 
 #### Show me! [↑](#start) ####
 
 ```javascript
-var BufferedReader = require ("../build/buffered-reader");
+var BufferedReader = require ("buffered-reader");
 
 var offset;
 

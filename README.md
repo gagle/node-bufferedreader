@@ -60,8 +60,6 @@ Via npm:
 npm install buffered-reader
 ```
 
-Or simply copying `build/buffered-reader.js` into your project's directory and `require()` accordingly.
-
 ***
 
 <a name="compatibility"></a>

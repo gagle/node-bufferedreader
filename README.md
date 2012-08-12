@@ -44,7 +44,7 @@ new BufferedReader ("file", { encoding: "utf8" })
 					if (error) console.log (error);
 				});
 			});
-		})
+		});
 	})
 	.read ();
 ```

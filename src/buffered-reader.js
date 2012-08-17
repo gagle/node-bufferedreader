@@ -4,8 +4,8 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 05/08/2012
- * @version 0.2.6
+ * @modified 17/08/2012
+ * @version 0.2.7
  */
 "use strict";
 
@@ -14,19 +14,19 @@ var FS = require ("fs");
 
 var Error = require ("errno-codes");
 
-Error.create ("INVALID_BUFFER_SIZE", Error.getNextAvailableErrorCode (),
+Error.create ("INVALID_BUFFER_SIZE", Error.getNextAvailableErrno (),
 		"The buffer size must be greater than 0.");
-Error.create ("INVALID_START_OFFSET", Error.getNextAvailableErrorCode (),
+Error.create ("INVALID_START_OFFSET", Error.getNextAvailableErrno (),
 		"The start offset must be greater than or equals to 0.");
-Error.create ("INVALID_END_OFFSET", Error.getNextAvailableErrorCode (),
+Error.create ("INVALID_END_OFFSET", Error.getNextAvailableErrno (),
 		"The end offset must be greater than or equals to 0.");
-Error.create ("INVALID_RANGE_OFFSET", Error.getNextAvailableErrorCode (),
+Error.create ("INVALID_RANGE_OFFSET", Error.getNextAvailableErrno (),
 		"The end offset must be greater than or equals to the start offset.");
-Error.create ("INVALID_BYTES_RANGE_ERROR", Error.getNextAvailableErrorCode (),
+Error.create ("INVALID_BYTES_RANGE_ERROR", Error.getNextAvailableErrno (),
 		"The number of bytes to read must be greater than 0.");
-Error.create ("INVALID_SEEK_OFFSET", Error.getNextAvailableErrorCode (),
+Error.create ("INVALID_SEEK_OFFSET", Error.getNextAvailableErrno (),
 		"The offset must be greater than or equals to 0.");
-Error.create ("NO_FILE", Error.getNextAvailableErrorCode (),
+Error.create ("NO_FILE", Error.getNextAvailableErrno (),
 		"The source is not a file.");
 
 var BUFFER_SIZE = 16384;

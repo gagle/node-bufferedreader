@@ -14,19 +14,19 @@ var FS = require ("fs");
 
 var Error = require ("errno-codes");
 
-Error.create ("INVALID_BUFFER_SIZE", Error.getNextAvailableErrno (),
+Error.create (Error.getNextAvailableErrno (), "INVALID_BUFFER_SIZE", 
 		"The buffer size must be greater than 0.");
-Error.create ("INVALID_START_OFFSET", Error.getNextAvailableErrno (),
+Error.create (Error.getNextAvailableErrno (), "INVALID_START_OFFSET", 
 		"The start offset must be greater than or equals to 0.");
-Error.create ("INVALID_END_OFFSET", Error.getNextAvailableErrno (),
+Error.create (Error.getNextAvailableErrno (), "INVALID_END_OFFSET", 
 		"The end offset must be greater than or equals to 0.");
-Error.create ("INVALID_RANGE_OFFSET", Error.getNextAvailableErrno (),
+Error.create (Error.getNextAvailableErrno (), "INVALID_RANGE_OFFSET", 
 		"The end offset must be greater than or equals to the start offset.");
-Error.create ("INVALID_BYTES_RANGE_ERROR", Error.getNextAvailableErrno (),
+Error.create (Error.getNextAvailableErrno (), "INVALID_BYTES_RANGE_ERROR", 
 		"The number of bytes to read must be greater than 0.");
-Error.create ("INVALID_SEEK_OFFSET", Error.getNextAvailableErrno (),
+Error.create (Error.getNextAvailableErrno (), "INVALID_SEEK_OFFSET", 
 		"The offset must be greater than or equals to 0.");
-Error.create ("NO_FILE", Error.getNextAvailableErrno (),
+Error.create (Error.getNextAvailableErrno (), "NO_FILE", 
 		"The source is not a file.");
 
 var BUFFER_SIZE = 16384;

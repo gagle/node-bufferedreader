@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/Gagle/Node-BufferedReader.png)](http://travis-ci.org/Gagle/Node-BufferedReader)
 <a name="start"></a>
 
 Node BufferedReader

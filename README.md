@@ -38,7 +38,7 @@ new BufferedReader ("file", { encoding: "utf8" })
 			this.readBytes (9, function (error, bytes, bytesRead){
 				if (error) return console.log (error);
 				
-				console.log (bytes.toString ());
+				console.log (bytes.toString ()); //Prints: Curabitur
 				
 				this.close (function (error){
 					if (error) console.log (error);
@@ -47,6 +47,19 @@ new BufferedReader ("file", { encoding: "utf8" })
 		});
 	})
 	.read ();
+```
+
+file:
+
+```text
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Morbi convallis nibh massa, eu varius felis.
+
+Phasellus ultrices ligula sed odio ultricies egestas.
+Curabitur pretium magna in diam accumsan dignissim.
+Phasellus et tortor eu orci suscipit vehicula.
+Phasellus pulvinar mauris in purus consequat vel congue orci hendrerit.
+Pellentesque eget arcu magna, suscipit imperdiet eros.
 ```
 
 ***

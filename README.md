@@ -17,7 +17,7 @@ This library allows you to read files without worry about the buffers. There are
 #### Show me! [↑](#start) ####
 
 ```javascript
-var reader = require ("../build/buffered-reader");
+var reader = require ("buffered-reader");
 var BinaryReader = reader.BinaryReader;
 var DataReader = reader.DataReader;
 

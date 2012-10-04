@@ -11,7 +11,7 @@ Version: 1.0.0
 
 When you need to read a file you typically read a chunk of bytes called "buffer" to avoid multiple calls to the underlying I/O layer, so instead of reading directly from the disk, you read from the previous filled buffer. Doing this you win performance.
 
-This library allows you to read files without worry about the buffers. There are two ways to read the files. The first can only read binary data and has a pointer to move along the file (seek, skip, read). The second performs a read from the beginning to the end of the file and produces different events (byte, character, line, buffer...).
+This library allows you to read files without worry about the buffers. There are two ways to read the files. The first can only read binary data and has a pointer to move along the file (seek, skip, read). The second performs a read from the beginning to the end of the file and emits different events (byte, character, line, buffer...).
 
 <a name="showme"></a>
 #### Show me! [↑](#start) ####

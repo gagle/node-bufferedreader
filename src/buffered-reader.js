@@ -240,6 +240,8 @@ DataReader.prototype.pause = function (){
 };
 
 DataReader.prototype.read = function (){
+	if (this._reading) return;
+	
 	var me = this;
 	
 	FS.stat (this._fileName, function (error, stats){

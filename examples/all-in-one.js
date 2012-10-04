@@ -17,9 +17,9 @@ new DataReader (file, { encoding: "utf8" })
 		.on ("error", function (error){
 			console.log (error);
 		})
-		.on ("line", function (line, byteOffset){
+		.on ("line", function (line, nextByteOffset){
 			if (line === "Phasellus ultrices ligula sed odio ultricies egestas."){
-				offset = byteOffset;
+				offset = nextByteOffset;
 				this.interrupt ();
 			}
 		})

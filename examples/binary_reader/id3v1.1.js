@@ -157,6 +157,8 @@ new BinaryReader ("id3v1.1.mp3", { bufferSize: bufferSize, start: 127, fromEnd: 
 								
 								if (isLastCharNullByte){
 									tags.track = bytes.toString ("ascii");
+								}else{
+									tags.comment += bytes.toString ("ascii");
 								}
 								
 								//Read genre

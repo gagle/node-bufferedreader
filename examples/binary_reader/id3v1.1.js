@@ -5,8 +5,8 @@ var BinaryReader = require ("../../build/buffered-reader").BinaryReader;
 	
 	
 	
-	The ID3v1/v1.1 specification
-	----------------------------
+	ID3v1/v1.1 specification
+	------------------------
 	
 	http://www.id3.org/ID3v1
 

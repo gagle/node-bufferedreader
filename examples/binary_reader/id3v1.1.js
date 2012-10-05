@@ -107,7 +107,7 @@ var bufferSize = 16384;
 
 //The window starts from byte 127 starting from the end of the file, in our case the byte at the
 //offset 0240, value 54. The end limit is automatically set, it's the file size minus 1, offset
-//02BF, value 07
+//02BF, value 89
 new BinaryReader ("id3v1.1.mp3", { bufferSize: bufferSize, start: 127, fromEnd: true })
 	//The text has ASCII encoding so it's safe to read 1 byte per chararacter
 	//Check if TAG is present, if so the music file has ID3v1/v1.1 tags

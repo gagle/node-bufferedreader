@@ -4,8 +4,8 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 04/10/2012
- * @version 1.0.0
+ * @modified 07/10/2012
+ * @version 1.0.1
  */
 "use strict";
 
@@ -23,8 +23,6 @@ Error.create (Error.getNextAvailableErrno (), "INVALID_WINDOW_END_OFFSET",
 Error.create (Error.getNextAvailableErrno (), "INVALID_WINDOW_RANGE_OFFSET", 
 		"The end offset must be greater than or equals to the start offset and both of them must" +
 		" be inside the file range. Window: [{ws}, {we}], File: [0, {fe}].");
-Error.create (Error.getNextAvailableErrno (), "INVALID_BYTES_RANGE_ERROR", 
-		"The number of bytes to read must be greater than 0.");
 Error.create (Error.getNextAvailableErrno (), "INVALID_SEEK_OFFSET", 
 		"The relative offset must be inside the window range. Relative offset: {offset}, Relative" +
 		" window: [0, {we}].");
@@ -232,22 +230,36 @@ DataReader.prototype = Object.create (EVENTS.EventEmitter.prototype);
 DataReader.prototype.constructor = DataReader;
 
 DataReader.prototype.interrupt = function (){
-	if (this._reading) this._interrupted = true;
+	if (!this._interrupted){
+		if (this._paused){
+			this._paused = false;
+			this._line = null;
+			this._settings.start = 0;
+			this._line = null;
+			this.emit ("end");
+		}else{
+			this._interrupted = true;
+			this._reading = false;
+		}
+	}
 };
 
 DataReader.prototype.pause = function (){
-	if (this._reading && !this._paused) this._paused = true;
+	if (!this._paused){
+		this._paused = true;
+		this._reading = false;
+	}
 };
 
 DataReader.prototype.read = function (){
 	if (this._reading) return;
 	
+	this._reading = true;
 	var me = this;
 	
 	FS.stat (this._fileName, function (error, stats){
 		if (error) return me.emit ("error", error);
 		
-		me._reading = true;
 		me._stream = FS.createReadStream (me._fileName, me._settings);
 		
 		var size = stats.size;
@@ -264,6 +276,7 @@ DataReader.prototype.read = function (){
 		me._stream
 				.on ("error", function (error){
 					me.emit ("error", error);
+					me._reading = false;
 					me._interrupted = false;
 					me._paused = false;
 					me._line = null;
@@ -275,6 +288,7 @@ DataReader.prototype.read = function (){
 						//ultima del archivo y no termina en \n
 						me.emit ("line", me._line, -1);
 					}
+					me._reading = false;
 					me._interrupted = false;
 					me._paused = false;
 					me._line = null;
@@ -354,8 +368,8 @@ DataReader.prototype.read = function (){
 };
 
 DataReader.prototype.resume = function (){
-	if (this._reading && this._paused){
-		this._paused = false;this.p=true;
+	if (this._paused){
+		this._paused = false;
 		this.read ();
 	}
 };

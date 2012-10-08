@@ -1,4 +1,5 @@
 var DataReader = require ("../../build/buffered-reader").DataReader;
+var FS = require ("fs");
 
 var file = "united_states_constitution";
 
@@ -56,6 +57,7 @@ new DataReader (file, { encoding: "utf8" })
 			
 			//If we found the word "Washington" we wait for 3 seconds
 			if (line.indexOf ("washington") !== -1){
+				//If the reading is paused the piped stream is also paused
 				this.pause ();
 				console.log ("Washington found. Waiting 3 seconds.\n");
 				var me = this;

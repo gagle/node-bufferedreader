@@ -1,6 +1,6 @@
 /**
  * @name BufferedReader.
- * @description Binary and streamed data buffers readers for node.js.
+ * @description Binary and event-based data buffered readers.
  *
  * @author Gabriel Llamas
  * @created 10/04/2012

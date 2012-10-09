@@ -3,7 +3,9 @@
 Node BufferedReader
 ===================
 
-#### Binary and event-based data buffer readers for node.js ####
+_Node.js project_
+
+#### Binary and event-based data buffered readers ####
 
 [Show me!](#showme) | [Availability](#availability) | [Compatibility](#compatibility) | [Documentation](#documentation)
 

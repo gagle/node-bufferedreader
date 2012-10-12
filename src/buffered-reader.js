@@ -4,7 +4,7 @@
  *
  * @author Gabriel Llamas
  * @created 10/04/2012
- * @modified 07/10/2012
+ * @modified 12/10/2012
  * @version 1.0.1
  */
 "use strict";
@@ -578,10 +578,8 @@ BinaryReader.prototype.seek = function (offset, cb){
 			me._globalOffset = me._window.toAbsoluteOffset (offset);
 			cb (null);
 		}else{
-			me._file.close (function (){
-				cb (Error.get (Error.INVALID_SEEK_OFFSET,
+			cb (Error.get (Error.INVALID_SEEK_OFFSET,
 					{ offset: offset, we: me._window._end - me._window._start }));
-			});
 		}
 	});
 };

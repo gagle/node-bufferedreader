@@ -213,6 +213,7 @@ var DataReader = function (fileName, settings){
 	this._settings = {
 		encoding: settings.encoding || null,
 		bufferSize: settings.bufferSize,
+		highWaterMark: settings.bufferSize,
 		start: 0
 	};
 	this._fileName = fileName;

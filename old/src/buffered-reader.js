@@ -428,7 +428,7 @@ BinaryReader.prototype.getOffset = function (){
 };
 
 BinaryReader.prototype.isOffsetOutOfWindow = function (){
-	return this._globalOffset == -1;
+	return this._globalOffset === -1;
 };
 
 BinaryReader.prototype.read = function (bytes, cb){

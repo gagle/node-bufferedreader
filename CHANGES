@@ -1,0 +1,82 @@
+v1.1.0 (xx Jan 2013)
+	Complete code revision and refactor.
+	Added Mocha tests.
+	Removed backward compatibility.
+	"interrupt()" renamed to "stop()".
+	Reduced the number of I/O calls when the DataReader is paused and resumed.
+
+v1.0.0 (04 Oct 2012)
+	Complete code refactor for better maintenance.
+	New classes "DataReader" and "BinaryReader". The "BufferedReader" class has
+		been deprecated.
+	Added new functions to "BinaryReader": "getOffset()" and
+		"isOffsetOutOfWindow()".
+	The "skip" function can move the offset backwards; a negative number of bytes
+		can be skipped.
+	Added constants to move the offset to the start and end of window:
+		"BinaryReader.START_OF_WINDOW", "BinaryReader.END_OF_WINDOW".
+	Added new setting to the "BinaryReader" constructor: "fromEnd".
+	Some bug fixes.
+
+v0.2.7 (17 Aug 2012)
+	Updated errno-codes module.
+
+v0.2.6 (05 Aug 2012)
+	Better error management.
+
+v0.2.5 (25 Jul 2012)
+	The buffered reader is closed automatically on error. There's no need to
+		close it again from outside.
+
+v0.2.4 (25 Jul 2012)
+	Fixed the byte offset in the "buffer" event when only a "buffer" event was
+		set.
+	Fixed the last byte offset of any data event. Now the last byte offset is -1.
+	Added "pause()" and "resume()".
+
+v0.2.3 (16 May 2012)
+	Improved "read()" performance when the line event is not configured.
+
+v0.2.2 (13 May 2012)
+	Added a "byteOffset" parameter to the callback of emitted "byte", "character",
+		"line" and "buffer" events.
+
+v0.2.1 (13 May 2012)
+	Improved "read()" performance.
+
+v0.2.0 (02 May 2012)
+	Fixed some bugs when the buffer had the same or less size than the bytes to
+		read.
+	Now the constructor receives an object in literal notation for the settings.
+	Added start and end offsets parameters for limitting the range of the read.
+	Added a "seek()" function for moving the file cursor for the next reading
+		operation.
+	Improved "skip()" performance. Now it calls to "seek()" function with the
+		appropriate offset instead of reading the content into the buffer trying
+		to simulate a jump.
+
+v0.1.2 (29 Apr 2012)
+	Added "skip()" function to skip bytes.
+
+v0.1.1 (25 Apr 2012)
+	Added "interrupt()" function to stop the file reading started with "read()".
+
+v0.1.0 (25 Apr 2012)
+	New feature. Now it's possible to read a chunk of bytes using internal
+		buffers.
+
+v0.0.6 (21 Apr 2012)
+	Changed the way the module is required. Now can be required using
+		"var BufferedReader = require ("buffered-reader");"
+
+v0.0.5 (16 Apr 2012)
+	Removed "getFileName()" internal function.
+
+v0.0.4 (12 Apr 2012)
+	"read()" can be called multiple times with the same "BufferedReader" instance.
+
+v0.0.3 (11 Apr 2012)
+	Fixed bug with Windows end of lines.
+
+v0.0.2 (11 Apr 2012)
+	First commit.

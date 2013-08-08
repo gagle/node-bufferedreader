@@ -1,0 +1,29 @@
+{
+	"name": "buffered-reader",
+	"version": "1.0.2",
+	"description": "Binary and event-based data buffered readers.",
+	"keywords": ["buffer", "reader", "read", "line", "file", "text", "seek",
+			"binary"],
+	"author": {
+		"name": "Gabriel Llamas",
+		"email": "gaglekas@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/Gagle/Node-BufferedReader.git"
+	},
+	"engines": {
+		"node": "*"
+	},
+	"dependencies": {
+		"error-provider": "*"
+	},
+	"devDependencies": {
+		"mocha-runner": "*"
+	},
+	"licenses": [{
+		"type": "MIT",
+		"url": "http://www.opensource.org/licenses/mit-license.html"
+	}],
+	"main": "lib/buffered-reader"
+}

@@ -1,5 +1,4 @@
-node_modules
-tests
-.npmignore
 CHANGES
-LICENSE
+examples
+test
+.npmignore

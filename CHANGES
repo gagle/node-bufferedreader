@@ -1,9 +1,8 @@
-v1.1.0 (xx Jan 2013)
+v2.0.0 (xx Aug 2013)
 	Complete code revision and refactor.
-	Added Mocha tests.
-	Removed backward compatibility.
-	"interrupt()" renamed to "stop()".
-	Reduced the number of I/O calls when the DataReader is paused and resumed.
+	The module is renamed to "binary-reader".
+	The DataReader class is removed. If you want to read lines use another module.
+	A synchronous api, but asynchronous execution, has been added.
 
 v1.0.0 (04 Oct 2012)
 	Complete code refactor for better maintenance.

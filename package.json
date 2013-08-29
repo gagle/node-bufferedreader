@@ -17,6 +17,9 @@
 	"dependencies": {
 		"deferred-queue": "*"
 	},
+	"devDependencies": {
+		"hex": "*"
+	},
 	"license": "MIT",
 	"main": "lib"
 }

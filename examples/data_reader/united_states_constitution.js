@@ -1,4 +1,4 @@
-var DataReader = require ("../../build/buffered-reader").DataReader;
+var DataReader = require ("../lib").DataReader;
 var FS = require ("fs");
 
 var file = "united_states_constitution";

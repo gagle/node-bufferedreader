@@ -1,18 +1,3 @@
-v2.0.0 (xx Aug 2013)
-	Complete code revision and refactor.
-	The module is renamed to "binary-reader".
-	The DataReader class is removed. If you want to read lines use another module,
-		for example, a transform stream:
-		http://blog.strongloop.com/practical-examples-of-the-new-node-js-streams-api/
-	A synchronous api but asynchronous execution has been added.
-	"skip()" has been removed. Use "seek()" with an offset from the current
-		position.
-	"getOffset()" has been renamed to "tell()".
-	"seek()" now accepts a "whence" parameter describing from where is referenced
-		the offset.
-	Added "size()".
-	"isOffsetOutOfWindow()" has been refactored and renamed to "isEOF()".
-
 v1.0.0 (04 Oct 2012)
 	Complete code refactor for better maintenance.
 	New classes "DataReader" and "BinaryReader". The "BufferedReader" class has

@@ -1,4 +1,4 @@
-var DataReader = require ("../../build/buffered-reader").DataReader;
+var DataReader = require ("../lib").DataReader;
 
 console.log ("First line, expected offset: 21");
 console.log ("Second line, expected offset: 61\n");

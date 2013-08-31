@@ -1,4 +1,4 @@
-var BinaryReader = require ("../../build/buffered-reader").BinaryReader;
+var BinaryReader = require ("../lib").BinaryReader;
 
 var file = "binary_reader_file";
 

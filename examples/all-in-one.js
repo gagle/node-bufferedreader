@@ -1,4 +1,4 @@
-var reader = require ("../build/buffered-reader");
+var reader = require ("../lib");
 var BinaryReader = reader.BinaryReader;
 var DataReader = reader.DataReader;
 

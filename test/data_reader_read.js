@@ -1,4 +1,4 @@
-var DataReader = require ("../../build/buffered-reader").DataReader;
+var DataReader = require ("../lib").DataReader;
 
 var file = "data_reader_file";
 var encoding = "utf8";

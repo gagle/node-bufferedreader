@@ -1,4 +1,4 @@
-var BinaryReader = require ("../../build/buffered-reader").BinaryReader;
+var BinaryReader = require ("../lib").BinaryReader;
 
 /*
 	This example reads the ID3v1.1 tags from a mp3 file.

@@ -1,4 +1,6 @@
-## UNDER HEAVY DEVELOPMENT, THIS MODULE WILL BE DEPRECATED
+## UNDER HEAVY DEVELOPMENT
+## THIS MODULE WILL BE DEPRECATED
+## [binary-reader](https://github.com/gagle/node-binary-reader) will be the next version
 
 <a name="start"></a>
 

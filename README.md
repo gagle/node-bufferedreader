@@ -1,6 +1,5 @@
-### UNDER HEAVY DEVELOPMENT
-### THIS MODULE WILL BE DEPRECATED
-### [binary-reader](https://github.com/gagle/node-binary-reader) will be the next version
+### THIS MODULE IS DEPRECATED, NO MORE FIXES, NO MORE ADDITIONS
+### [binary-reader](https://github.com/gagle/node-binary-reader) is the next binary reader module
 
 <a name="start"></a>
 
